@@ -26,23 +26,22 @@ def health():
 
 @app.get("/test")
 def test():
-    url = (
-        "https://api.open-meteo.com/v1/forecast"
-        "?latitude=23.34&longitude=85.31"
-        "&current=temperature_2m,wind_speed_10m,weather_code"
-    )
+    url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
     resp = requests.get(url, timeout=10)
-    data = resp.json()
-    if resp.status_code != 200 or "current" not in data:
-        return {"weather_error": resp.status_code, "details": data}
-    weather = data["current"]
+    if resp.status_code != 200:
+        return {"data_error": resp.status_code, "details": resp.text[:300]}
+    features = resp.json().get("features", [])[:3]
+    quakes = [
+        {"place": f["properties"]["place"], "magnitude": f["properties"]["mag"]}
+        for f in features
+    ]
     r = client.chat.completions.create(
         model=MODEL,
         messages=[
             {
                 "role": "user",
-                "content": f"Describe this weather in one friendly sentence: {weather}",
+                "content": f"Summarize these recent earthquakes in one friendly sentence: {quakes}",
             }
         ],
     )
-    return {"weather": weather, "ai": r.choices[0].message.content}
+    return {"quakes": quakes, "ai": r.choices[0].message.content}
