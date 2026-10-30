@@ -24,10 +24,14 @@ def health():
 
 @app.get("/test")
 def test():
-    weather = requests.get(
-        "https://api.open-meteo.com/v1/forecast?latitude=23.34&longitude=85.31&current_weather=true",
-        timeout=10,
-    ).json()["current_weather"]
+    @app.get("/test")
+def test():
+    url = "https://api.open-meteo.com/v1/forecast?latitude=23.34&longitude=85.31&current=temperature_2m,wind_speed_10m,weather_code"
+    resp = requests.get(url, timeout=10)
+    data = resp.json()
+    if resp.status_code != 200 or "current" not in data:
+        return {"weather_error": resp.status_code, "details": data}
+    weather = data["current"]
     r = client.chat.completions.create(
         model=MODEL,
         messages=[{"role": "user", "content": f"Describe this weather in one friendly sentence: {weather}"}],
