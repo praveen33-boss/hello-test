@@ -9,7 +9,7 @@
       const out = document.getElementById("out");
       out.textContent = "Loading... (the first call can take up to a minute)";
       try {
-        const r = await fetch("https://hello-test-aymj.onrender.com");
+        const r = await fetch("https://hello-test-aymj.onrender.com/test");
         const d = await r.json();
         out.textContent = JSON.stringify(d, null, 2);
       } catch (e) {
