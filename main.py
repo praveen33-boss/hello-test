@@ -18,15 +18,19 @@ app.add_middleware(
 client = Groq(api_key=os.environ["GROQ_API_KEY"])
 MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
+
 @app.get("/")
 def health():
     return {"status": "ok"}
 
+
 @app.get("/test")
 def test():
-    @app.get("/test")
-def test():
-    url = "https://api.open-meteo.com/v1/forecast?latitude=23.34&longitude=85.31&current=temperature_2m,wind_speed_10m,weather_code"
+    url = (
+        "https://api.open-meteo.com/v1/forecast"
+        "?latitude=23.34&longitude=85.31"
+        "&current=temperature_2m,wind_speed_10m,weather_code"
+    )
     resp = requests.get(url, timeout=10)
     data = resp.json()
     if resp.status_code != 200 or "current" not in data:
@@ -34,6 +38,11 @@ def test():
     weather = data["current"]
     r = client.chat.completions.create(
         model=MODEL,
-        messages=[{"role": "user", "content": f"Describe this weather in one friendly sentence: {weather}"}],
+        messages=[
+            {
+                "role": "user",
+                "content": f"Describe this weather in one friendly sentence: {weather}",
+            }
+        ],
     )
     return {"weather": weather, "ai": r.choices[0].message.content}
